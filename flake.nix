@@ -1,0 +1,113 @@
+{
+    description = "Rust versions setup via fenix";
+
+    inputs = {
+        libSource.url = "github:divnix/nixpkgs.lib";
+        flake-utils.url = "github:numtide/flake-utils";
+        # nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+        nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
+        home-manager.url = "github:nix-community/home-manager";
+        home-manager.inputs.nixpkgs.follows = "nixpkgs";
+        xome.url = "github:jeff-hykin/xome";
+        rustFlake.url = "github:jeff-hykin/rust_flake/v1.89.0";
+        rustFlake.inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    outputs = { self, flake-utils, nixpkgs, rustFlake, ... }:
+        flake-utils.lib.eachSystem flake-utils.lib.allSystems (system:
+            let
+                pkgs = import nixpkgs {
+                    inherit system;
+                    config = {
+                        allowUnfree = true;
+                        allowInsecure = true;
+                        permittedInsecurePackages = [
+                        ];
+                    };
+                };
+                rust = rustFlake.packages.${system};
+                rustPkg = rust.default; 
+            in
+                {
+                    packages.default = rust.lib.rustPlatform.buildRustPackage {
+                        pname = "render-ui";
+                        version = "0.1.0";
+                        src = ./.;
+
+                        cargoLock = {
+                            lockFile = ./Cargo.lock;
+                        };
+
+                        meta = {
+                            description = "3D render UI with yew";
+                        };
+                    };
+                    
+                    devShells = xome.simpleMakeHomeFor {
+                        inherit pkgs;
+                        pure = true;
+                        homeModule = {
+                            # for home-manager examples, see: 
+                            # https://deepwiki.com/nix-community/home-manager/5-configuration-examples
+                            # all home-manager options: 
+                            # https://nix-community.github.io/home-manager/options.xhtml
+                            home.homeDirectory = "/tmp/virtual_homes/xome_simple";
+                            home.stateVersion = "25.11";
+                            home.packages = [
+                                # project stuff
+                                rust.default
+                                pkgs.trunk
+                                
+                                # vital stuff
+                                pkgs.coreutils-full
+                                
+                                # optional stuff
+                                pkgs.gnugrep
+                                pkgs.findutils
+                                pkgs.wget
+                                pkgs.curl
+                                pkgs.unixtools.locale
+                                pkgs.unixtools.more
+                                pkgs.unixtools.ps
+                                pkgs.unixtools.getopt
+                                pkgs.unixtools.ifconfig
+                                pkgs.unixtools.hostname
+                                pkgs.unixtools.ping
+                                pkgs.unixtools.hexdump
+                                pkgs.unixtools.killall
+                                pkgs.unixtools.mount
+                                pkgs.unixtools.sysctl
+                                pkgs.unixtools.top
+                                pkgs.unixtools.umount
+                                pkgs.git
+                                pkgs.htop
+                                pkgs.ripgrep
+                            ];
+                            
+                            programs = {
+                                home-manager = {
+                                    enable = true;
+                                };
+                                zsh = {
+                                    enable = true;
+                                    enableCompletion = true;
+                                    autosuggestion.enable = true;
+                                    syntaxHighlighting.enable = true;
+                                    shellAliases.ll = "ls -la";
+                                    history.size = 100000;
+                                    # this is kinda like .zshrc
+                                    initContent = ''
+                                        # this enables some impure stuff like sudo, comment it out to get FULL purity
+                                        export PATH="$PATH:/usr/bin/"
+                                    '';
+                                };
+                                starship = {
+                                    enable = true;
+                                    enableZshIntegration = true;
+                                };
+                            };
+                        }; 
+                    };
+                }
+    );
+}
