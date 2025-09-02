@@ -1,12 +1,11 @@
 {
-    description = "Rust versions setup via fenix";
+    description = "Render UI with yew";
 
     inputs = {
         libSource.url = "github:divnix/nixpkgs.lib";
         flake-utils.url = "github:numtide/flake-utils";
-        # nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-        nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
-        home-manager.url = "github:nix-community/home-manager";
+        nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+        home-manager.url = "github:nix-community/home-manager/release-25.05";
         home-manager.inputs.nixpkgs.follows = "nixpkgs";
         xome.url = "github:jeff-hykin/xome";
         xome.inputs.nixpkgs.follows = "nixpkgs";
@@ -54,7 +53,7 @@
                             # all home-manager options: 
                             # https://nix-community.github.io/home-manager/options.xhtml
                             home.homeDirectory = "/tmp/virtual_homes/xome_simple";
-                            home.stateVersion = "25.11";
+                            home.stateVersion = "25.05";
                             home.packages = [
                                 # project stuff
                                 rust.default
