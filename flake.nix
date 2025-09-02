@@ -9,11 +9,13 @@
         home-manager.url = "github:nix-community/home-manager";
         home-manager.inputs.nixpkgs.follows = "nixpkgs";
         xome.url = "github:jeff-hykin/xome";
+        xome.inputs.nixpkgs.follows = "nixpkgs";
+        xome.inputs.home-manager.follows = "home-manager";
         rustFlake.url = "github:jeff-hykin/rust_flake/v1.89.0";
         rustFlake.inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    outputs = { self, flake-utils, nixpkgs, rustFlake, ... }:
+    outputs = { self, libSource, flake-utils, nixpkgs, home-manager, xome, rustFlake, ... }:
         flake-utils.lib.eachSystem flake-utils.lib.allSystems (system:
             let
                 pkgs = import nixpkgs {
