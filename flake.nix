@@ -10,15 +10,19 @@
         xome.url = "github:jeff-hykin/xome";
         xome.inputs.nixpkgs.follows = "nixpkgs";
         xome.inputs.home-manager.follows = "home-manager";
-        rustFlake.url = "github:jeff-hykin/rust_flake/v1.89.0";
-        rustFlake.inputs.nixpkgs.follows = "nixpkgs";
+        # rustFlake.url = "github:jeff-hykin/rust_flake/v1.89.0";
+        # rustFlake.inputs.nixpkgs.follows = "nixpkgs";
+        fenix.url = "github:nix-community/fenix";
+        fenix.inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    outputs = { self, libSource, flake-utils, nixpkgs, home-manager, xome, rustFlake, ... }:
-        flake-utils.lib.eachSystem flake-utils.lib.allSystems (system:
+    outputs = { self, flake-utils, nixpkgs, fenix, xome, ... }:
+        flake-utils.lib.eachSystem (builtins.attrNames fenix.packages) (system:
             let
                 pkgs = import nixpkgs {
                     inherit system;
+                    overlays = [
+                        fenix.overlays.default 
+                    ];
                     config = {
                         allowUnfree = true;
                         allowInsecure = true;
@@ -26,14 +30,32 @@
                         ];
                     };
                 };
-                rust = rustFlake.packages.${system};
-                rustPkg = rust.default; 
+                rustToolchain = pkgs.fenix.combine [
+                    pkgs.fenix.stable.rustc
+                    pkgs.fenix.stable.cargo
+                    pkgs.fenix.stable.clippy
+                    pkgs.fenix.stable.rustfmt
+                    pkgs.fenix.targets.wasm32-unknown-unknown.stable.rust-std
+                    # pkgs.fenix.targets.x86_64-unknown-linux-musl.stable.rust-std
+                ];
+                rustPlatform = pkgs.makeRustPlatform {
+                    rustc = rustToolchain;
+                    cargo = rustToolchain;
+                };
+                nativeBuildInputs = [
+                    pkgs.trunk
+                    pkgs.wasm-bindgen-cli
+                    pkgs.nodePackages.sass
+                    pkgs.pkg-config
+                ];
             in
                 {
-                    packages.default = rust.lib.rustPlatform.buildRustPackage {
+                    packages.default = rustPlatform.buildRustPackage {
                         pname = "render-ui";
                         version = "0.1.0";
                         src = ./.;
+                        
+                        nativeBuildInputs = nativeBuildInputs;
 
                         cargoLock = {
                             lockFile = ./Cargo.lock;
@@ -42,6 +64,10 @@
                         meta = {
                             description = "3D render UI with yew";
                         };
+                        
+                        buildPhase = "trunk build";
+                        installPhase = "cp -r dist $out";
+                        XDG_CACHE_HOME = "/tmp/build/cache";
                     };
                     
                     devShells = xome.simpleMakeHomeFor {
@@ -52,12 +78,11 @@
                             # https://deepwiki.com/nix-community/home-manager/5-configuration-examples
                             # all home-manager options: 
                             # https://nix-community.github.io/home-manager/options.xhtml
-                            home.homeDirectory = "/tmp/virtual_homes/xome_simple";
+                            home.homeDirectory = "/tmp/virtual_homes/render_ui";
                             home.stateVersion = "25.05";
-                            home.packages = [
+                            home.packages = nativeBuildInputs ++ [
                                 # project stuff
-                                rust.default
-                                pkgs.trunk
+                                rustToolchain
                                 
                                 # vital stuff
                                 pkgs.coreutils-full
