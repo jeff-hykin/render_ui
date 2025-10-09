@@ -1,3 +1,5 @@
+/** @jsx h */
+import { h } from "./jsx.ts"
 import { HelloWorld } from "./components/HelloWorld.tsx"
 import { createSignal } from "https://esm.sh/solid-js@1.9.9?dev"
 

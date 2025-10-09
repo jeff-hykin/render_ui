@@ -1384,19 +1384,19 @@ function App() {
   const decrement = () => setCount(count() - 1);
   const reset2 = () => setCount(0);
   console.log(`here`);
-  return /* @__PURE__ */ React.createElement("div", {
+  return /* @__PURE__ */ h("div", {
     style: {
       textAlign: "center",
       "margin-top": "2rem"
     }
-  }, /* @__PURE__ */ React.createElement("h1", null, "Solid.js Counter"), /* @__PURE__ */ React.createElement("h2", null, "Count: ", count), /* @__PURE__ */ React.createElement("button", {
+  }, /* @__PURE__ */ h("h1", null, "Solid.js Counter"), /* @__PURE__ */ h("h2", null, "Count: ", count), /* @__PURE__ */ h("button", {
     onClick: decrement
-  }, "-"), /* @__PURE__ */ React.createElement("button", {
+  }, "-"), /* @__PURE__ */ h("button", {
     onClick: reset2,
     style: {
       margin: "0 1rem"
     }
-  }, "Reset"), /* @__PURE__ */ React.createElement("button", {
+  }, "Reset"), /* @__PURE__ */ h("button", {
     onClick: increment
   }, "+"));
 }
