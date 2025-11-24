@@ -1,7 +1,7 @@
 /** @jsx h */
-import { h } from "./jsx.ts"
+import { createSignal, h } from "./tools/solid.js"
 import { HelloWorld } from "./components/HelloWorld.tsx"
-import { createSignal } from "https://esm.sh/solid-js@1.9.9?dev"
+import { Panels } from "./components/Panels.tsx"
 
 export default function App() {
     const [count, setCount] = createSignal(0)
@@ -24,6 +24,7 @@ export default function App() {
                 Reset
             </button>
             <button onClick={increment}>+</button>
+            <Panels style={{ "min-height": "10rem" }} />
         </div>
     )
 }

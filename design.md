@@ -1,0 +1,27 @@
+- Data Sources
+    - Link a name to a url/port/credentials etc
+    - Starting out: just an input panel for a url
+    - All have a namespace
+    - TODO: consider the play/pause design
+- Transformers
+    - Take some kind of data and transform it with a function
+    - Have a checker for acceptable data input format
+- Playback (of some kind) tied to each data source
+
+- Render Zones
+    - Visual areas on the screen that receive updates from data sources
+    - Eventually: 2D, 3D, and JSON-data rendering zones
+        - Handles plots/graphs/maps
+    - Starting out: a fixed size 3D rendering zone
+    - ## Visualizers:
+        - Take some kind of data and render it in a visual way
+            - Take per-source settings
+            - Checkboxes for enable/disabling visual elements
+        - Different depending on the render zone
+        - Types:
+            - Static: (background, map, etc)
+            - Stateless: message data directly becomes a visual update
+            - Stateful: needs a history (for playback/rewind)
+                - Much more complex and difficult to do efficiently
+    - ## Hooks:
+        - Connect a data source to a visualizer
