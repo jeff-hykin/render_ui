@@ -76,7 +76,7 @@ export function relayMessages(config={}) {
                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
                         <title>${escapeHtml(config.title||"Render UI")}</title>
                         <script type="module">
-                            import { renderUiConnectionKey } from "https://esm.sh/gh/jeff-hykin/render_ui@0.0.1/main/frontend/connectionsCore.js"
+                            import { renderUiConnectionKey } from "https://esm.sh/gh/jeff-hykin/render_ui@cae2868/main/frontend/connectionsCore.js"
                             globalThis[renderUiConnectionKey].connections = {
                                 default: ${escapeHtml(JSON.stringify(connectionInfo))},
                             }
