@@ -37,7 +37,7 @@ export function getHighestZIndex(parent) {
 // -------------------------------------------------------------
 export function generateName() {
     return toCamelCase(uniqueNamesGenerator({
-        dictionaries: [adjectives, colors, animals],
+        dictionaries: [ colors, animals],
         separator: "-",
         length: 3,
     }))
