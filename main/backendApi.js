@@ -62,17 +62,45 @@ export function relayMessages(config={}) {
                     // check if the frontend has changed (uses caching and modified times)
                     const {hash, lastModificationTime} = await hashItem(`${thisFolder}/frontend/`, { cache: storageObject.renderUiFrontendCache })
                     if (hash != storageObject.renderUiBundleHash) {
-                        storageObject.renderUiBundleHash = hash
                         console.log(`bundling frontend ... `)
                         try {
                             code = escapeInnerJs(new TextDecoder().decode(await jsBundle(`${thisFolder}/frontend/main.js`)))
                             // save the bundle, escaped for html, for static importing later
                             FileSystem.write({path:`${thisFolder}/frontend/main.bundle.js`, data:`export default ${escapeJsString(code)}`}).catch((error)=>{
                                 console.warn(`failed to save the bundled frontend, nbd: ${error}`)
+                            }).then(()=>{
+                                // update the hash only after the file is saved
+                                storageObject.renderUiBundleHash = hash
                             })
                         } catch (error) {
                             console.log(`failed to bundle frontend: ${error}`)
                         }
+                    }
+                }
+                const connectionInfoCopy = {...connectionInfo}
+                if (connectionInfoCopy.hostname == "0.0.0.0" || connectionInfoCopy.hostname == "::" || connectionInfoCopy.hostname == "localhost") {
+                    try {
+                        const addresses = [...Deno.networkInterfaces()].map(each=>each.address)
+                        if (addresses.includes("127.0.0.1")) {
+                            connectionInfoCopy.hostname = "127.0.0.1"
+                        }
+                        let filtered = addresses.filter(each=>each.match(/^192\.168\.\d+\.\d+$/))
+                        if (filtered.length>0) {
+                            connectionInfoCopy.hostname = filtered[0]
+                        }
+                        filtered = addresses.filter(each=>each.match(/^10\.\d+\.\d+\.\d+$/))
+                        if (filtered.length>0) {
+                            connectionInfoCopy.hostname = filtered[0]
+                        }
+                        // ipv4
+                        filtered = addresses.filter(each=>each.match(/^\d+\.\d+\.\d+\.\d+$/))
+                        if (filtered.length>0) {
+                            connectionInfoCopy.hostname = filtered[0]
+                        }
+                        // fallback on whatever
+                        connectionInfoCopy.hostname = addresses[0]
+                    } catch (error) {
+                        connectionInfoCopy.hostname = "localhost"
                     }
                 }
                 return new Response(new TextEncoder().encode(`<!DOCTYPE html>
@@ -338,9 +366,6 @@ export function relayMessages(config={}) {
                             </div>
                         </body>
                         <script>
-                            // 
-                            // Synchonous/Fast loading animation
-                            // 
                                 const animateLoader = ()=>{
                                 const element = document.getElementById("good-component--initial-loader")
                                     element && element.animate(
@@ -360,7 +385,7 @@ export function relayMessages(config={}) {
                     <script type="module">
                         import { renderUiConnectionKey } from "https://esm.sh/gh/jeff-hykin/render_ui@cae2868/main/frontend/connectionsCore.js"
                         globalThis[renderUiConnectionKey].connections = {
-                            default: ${escapeInnerJs(JSON.stringify(connectionInfo))},
+                            default: ${escapeInnerJs(JSON.stringify(connectionInfoCopy))},
                         }
                     </script>
                     <script type="module">
