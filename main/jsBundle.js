@@ -1,6 +1,5 @@
 import { build, stop, context } from "https://deno.land/x/esbuild@v0.24.0/mod.js"
 import { denoPlugins } from "https://esm.sh/jsr/@luca/esbuild-deno-loader@0.11.1/mod.ts"
-import { FileSystem } from "https://deno.land/x/quickr@0.8.6/main/file_system.js"
 
 // 
 // bundle the JS
@@ -18,8 +17,12 @@ export function jsBundle(path) {
                     "name": "handle-on-build",
                     "setup": (build) => {
                         build.onEnd((result) => {
-                            const eachOutput = result.outputFiles[0]
-                            resolve(eachOutput.contents)
+                            if (result.errors && result.errors.length > 0) {
+                                reject(result.errors)
+                            } else {
+                                const eachOutput = result.outputFiles[0]
+                                resolve(eachOutput.contents)
+                            }
                         })
                     },
                 },
@@ -56,6 +59,8 @@ export function jsBundle(path) {
                 "node:zlib",
                 "node:inspector",
             ]
+        }).catch(error=>{
+            reject(error)
         })
     })
 }

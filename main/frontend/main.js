@@ -1,13 +1,15 @@
-// import { createEditor } from 'https://cdn.jsdelivr.net/gh/jeff-hykin/codemirror_esm@1.0.0.5/helpers.js'
-// import { javascript } from 'https://cdn.jsdelivr.net/gh/jeff-hykin/codemirror_esm@1.0.0.5/@codemirror/lang-javascript.js'
-// import { bash } from 'https://cdn.jsdelivr.net/gh/jeff-hykin/codemirror_esm@1.0.0.5/@codemirror/lang-bash.js'
-// import throttle from 'https://esm.sh/lodash/throttle'
-// import { translate } from 'https://esm.sh/gh/jeff-hykin/bash2deno@master/api.js'
-// import { renderUiConnectionKey } from "https://esm.sh/gh/jeff-hykin/render_ui@cae2868/main/frontend/connectionsCore.js"
-const renderUiConnectionKey = Symbol.for("renderUiConnectionCore")
+import { createEditor } from 'https://cdn.jsdelivr.net/gh/jeff-hykin/codemirror_esm@1.0.0.5/helpers.js'
+import { javascript } from 'https://cdn.jsdelivr.net/gh/jeff-hykin/codemirror_esm@1.0.0.5/@codemirror/lang-javascript.js'
+import { bash } from 'https://cdn.jsdelivr.net/gh/jeff-hykin/codemirror_esm@1.0.0.5/@codemirror/lang-bash.js'
+import throttle from 'https://esm.sh/lodash/throttle'
+import { translate } from 'https://esm.sh/gh/jeff-hykin/bash2deno@master/api.js'
+import { renderUiConnectionKey } from "https://esm.sh/gh/jeff-hykin/render_ui@ca4afbe/main/frontend/connectionsCore.js"
+globalThis.renderUiConnectionKey2 = renderUiConnectionKey
 var { html, passAlongProps } = await import("https://esm.sh/gh/jeff-hykin/elemental@0.6.5/main/deno.js?dev")
+import { createWindowingSystem } from "./desktop/main.js"
 
-const connections = globalThis[renderUiConnectionKey].connections
+console.debug(`renderUiConnectionKey is:`,renderUiConnectionKey)
+const connections = globalThis[Symbol.for("renderUiConnectionCore")].connections
 // DEBUGGING ONLY
 globalThis.connections = connections
 
@@ -24,15 +26,18 @@ function connect(connectionName) {
 globalThis.connect = connect
 
 
+const { createButton, desktop, manager } = createWindowingSystem()
 
-// const warningsDiv = html`<div style=${`
-//     height: 12rem;
-//     position: fixed;
-//     left: 0;
-//     bottom: 0;
-//     background-color: gray;
-//     overflow-y: scroll;
-// `}/>`
+createButton.style.position = 'fixed'
+createButton.style.top = '10px'
+createButton.style.right = '10px'
+
+desktop.style.position = 'fixed'
+desktop.style.left = '0'
+desktop.style.top = '0'
+desktop.style.width = '100vw'
+desktop.style.height = '100vh'
+
 
 // const javascriptEditor = createEditor({
 //     style: "width:50vw;height:100vh",
@@ -73,9 +78,7 @@ globalThis.connect = connect
 //     convertCode({element: bashEditor})
 // }, 500)
 
-
-// document.body = html`<body display=flex>
-//     ${bashEditor}
-//     ${javascriptEditor}
-//     ${warningsDiv}
-// </body>`
+document.body = html`<body display=flex font-family="sans-serif">
+    ${desktop}
+    ${createButton}
+</body>`

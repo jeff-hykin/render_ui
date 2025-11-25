@@ -73,7 +73,15 @@ export function relayMessages(config={}) {
                                 storageObject.renderUiBundleHash = hash
                             })
                         } catch (error) {
-                            console.log(`failed to bundle frontend: ${error}`)
+                            console.log(`failed to bundle frontend:`)
+                            if (error instanceof Error) {
+                                console.log(error.message)
+                                console.log(error.stack)
+                            } else if (error instanceof Array) {
+                                for (let each of error) {
+                                    console.debug(each)
+                                }
+                            }
                         }
                     }
                 }
@@ -383,10 +391,8 @@ export function relayMessages(config={}) {
                                 document.body ? animateLoader() : document.addEventListener("DOMContentLoaded", animateLoader)
                         </script>
                     <script type="module">
-                        import { renderUiConnectionKey } from "https://esm.sh/gh/jeff-hykin/render_ui@cae2868/main/frontend/connectionsCore.js"
-                        globalThis[renderUiConnectionKey].connections = {
-                            default: ${escapeInnerJs(JSON.stringify(connectionInfoCopy))},
-                        }
+                        import { renderUiConnectionKey } from "https://esm.sh/gh/jeff-hykin/render_ui@ca4afbe/main/frontend/connectionsCore.js"
+                        globalThis[renderUiConnectionKey].connections.default = ${escapeInnerJs(JSON.stringify(connectionInfoCopy))}
                     </script>
                     <script type="module">
                         ${code /* NOTE: this has already been escaped for html (e.g. cached escape) */}

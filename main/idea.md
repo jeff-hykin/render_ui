@@ -1,0 +1,12 @@
+- Things try to send data to this render service
+    - 3d data (objects)
+    - 2d data (lines, shapes, etc)
+    - viewpoints
+    - meta info (preferred color, time-value)
+    - the frontend can connect data sources to different render zones
+    - the frontend can intercept data and modify it before sending it to the render service
+- Ideally the protocol allows for low latency
+    - e.g. instead of sending all the data about all the objects, it could send the movement, scale, rotation, etc of an object
+- 3D actions:
+    - create box
+    - create camera
